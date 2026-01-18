@@ -81,7 +81,38 @@ function App() {
       console.error('Graph API call failed:', error);
     }
   };
+const callProtectedAPI = async () => {
+  if (accounts.length === 0) return;
 
+  try {
+    const response = await instance.acquireTokenSilent({
+      scopes: ["api://d814695a-c790-4261-b4bc-0b537717c148/access_as_user"],
+      account: accounts[0],
+    });
+
+    // Call API
+    const apiResponse = await fetch('http://localhost:3001/api/protected', {
+      headers: {
+        Authorization: `Bearer ${response.accessToken}`,
+      },
+    });
+
+    const data = await apiResponse.json();
+    console.log('Protected API response:', data);
+    alert('Protected API call successful! Check console for response.');
+  } catch (error) {
+    console.error('API call failed:', error);
+    // If silent token fails, try interactive
+    try {
+      const response = await instance.acquireTokenRedirect({
+        scopes: ["api://d814695a-c790-4261-b4bc-0b537717c148/access_as_user"],
+        account: accounts[0],
+      });
+    } catch (redirectError) {
+      console.error('Redirect failed:', redirectError);
+    }
+  }
+};
   const decodeJWT = (token: string) => {
     try {
       const base64Url = token.split('.')[1];
@@ -114,7 +145,7 @@ function App() {
         ) : (
           <div className="authenticated-section">
             <div className="user-info">
-              <h2>✓ Authenticated</h2>
+              <h2>Authenticated</h2>
               <p><strong>User:</strong> {accounts[0].name}</p>
               <p><strong>Email:</strong> {accounts[0].username}</p>
             </div>
@@ -156,6 +187,9 @@ function App() {
             <div className="actions">
               <button onClick={callMicrosoftGraph} className="graph-button">
                 📊 Call Microsoft Graph API
+              </button>
+              <button onClick={callProtectedAPI} className="graph-button">
+                🔐 Call Protected API
               </button>
               <button onClick={handleLogout} className="logout-button">
                 🚪 Logout

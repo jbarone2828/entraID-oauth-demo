@@ -16,6 +16,6 @@ export const loginRequest: PopupRequest = {
   scopes: ["User.Read", "openid", "profile", "email"],
 };
 
-export const tokenRequest = {
-  scopes: ["api://d814695a-c790-4261-b4bc-0b537717c148/access_as_user"], 
+export const apiRequest = {
+  scopes: ["api://d814695a-c790-4261-b4bc-0b537717c148/access_as_user"]
 };
